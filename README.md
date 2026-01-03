@@ -81,13 +81,17 @@ The system uses a 2-bit Finite State Machine:
 ## 6. Key Equations and Calculations
 
 ### 555 Timer Frequency (FSM_CLK)
-$$f = \frac{1.44}{(R_a + 2R_b) \cdot C} \approx 4.8\text{ Hz}}$$
-$$T = \frac{1}{f} \approx 0.21\text{ s}}$$
+$$
+f = \frac{1.44}{(R_a + 2R_b)\,C} \approx 4.8\ \mathrm{Hz}
+$$
+$$
+T = \frac{1}{f} \approx 0.21\ \mathrm{s}
+$$
 
 ### Delays
-*   **Debounce (3 cycles):** $3 \times 0.21\text{s} \approx 0.63\text{s}$
-*   **Stabilization (5 cycles):** $5 \times 0.21\text{s} \approx 1.05\text{s}$
+*   **Debounce (3 cycles):** $3 \times 0.21\,\mathrm{s} \approx 0.63\,\mathrm{s}$
+*   **Stabilization (5 cycles):** $5 \times 0.21\,\mathrm{s} \approx 1.05\,\mathrm{s}$
 
 ### Voltage Thresholds (Scaled)
-*   **Upper Threshold:** $\approx 4.08\text{V}$ (Typical for ~240V mains equivalent)
-*   **Lower Threshold:** $\approx 2.78\text{V}$ (Typical for ~180V mains equivalent)
+*   **Upper Threshold:** $\approx 4.08\,\mathrm{V}$ (Typical for ~240V mains equivalent)
+*   **Lower Threshold:** $\approx 2.78\,\mathrm{V}$ (Typical for ~180V mains equivalent)
