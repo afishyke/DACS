@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "74HC151D")(type "KiCad")(uri "/home/abhishek/DACS/74HC151D/74HC151D.kicad_sym")(options "")(descr ""))
+)

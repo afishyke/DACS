@@ -1,0 +1,17 @@
+# KiCad
+*.lck
+*.kicad_prl
+fp-info-cache
+_autosave-*
+*.bak
+*.000
+*.kicad_pcb-bak
+
+# Backups and Zips
+SCHEMATIC/schematic-backups/
+*.zip
+
+# Temporary/OS files
+.DS_Store
+Thumbs.db
+*~
