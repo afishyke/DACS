@@ -8,7 +8,7 @@ _autosave-*
 *.kicad_pcb-bak
 
 # Backups and Zips
-SCHEMATIC/schematic-backups/
+hardware/kicad/schematic-backups/
 *.zip
 
 # Temporary/OS files

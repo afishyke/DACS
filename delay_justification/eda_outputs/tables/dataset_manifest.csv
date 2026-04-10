@@ -1,0 +1,21 @@
+name,relative_path,file_type,size_bytes,size_human,likely_purpose
+Flicker.csv,Flicker.csv,csv,1828064,1.74 MB,Per-class waveform matrix (signals x samples)
+Flicker_with_Sag.csv,Flicker_with_Sag.csv,csv,1845224,1.76 MB,Per-class waveform matrix (signals x samples)
+Flicker_with_Swell.csv,Flicker_with_Swell.csv,csv,1808478,1.72 MB,Per-class waveform matrix (signals x samples)
+Harmonics.csv,Harmonics.csv,csv,1833542,1.75 MB,Per-class waveform matrix (signals x samples)
+Harmonics_with_Sag.csv,Harmonics_with_Sag.csv,csv,1848883,1.76 MB,Per-class waveform matrix (signals x samples)
+Harmonics_with_Swell.csv,Harmonics_with_Swell.csv,csv,1812584,1.73 MB,Per-class waveform matrix (signals x samples)
+Interruption.csv,Interruption.csv,csv,1889934,1.80 MB,Per-class waveform matrix (signals x samples)
+Notch.csv,Notch.csv,csv,1847524,1.76 MB,Per-class waveform matrix (signals x samples)
+Oscillatory_Transient.csv,Oscillatory_Transient.csv,csv,1839624,1.75 MB,Per-class waveform matrix (signals x samples)
+Pure_Sinusoidal.csv,Pure_Sinusoidal.csv,csv,1802000,1.72 MB,Per-class waveform matrix (signals x samples)
+Sag.csv,Sag.csv,csv,1826423,1.74 MB,Per-class waveform matrix (signals x samples)
+Sag_with_Harmonics.csv,Sag_with_Harmonics.csv,csv,1855000,1.77 MB,Per-class waveform matrix (signals x samples)
+Sag_with_Oscillatory_Transient.csv,Sag_with_Oscillatory_Transient.csv,csv,1851764,1.77 MB,Per-class waveform matrix (signals x samples)
+Swell.csv,Swell.csv,csv,1789009,1.71 MB,Per-class waveform matrix (signals x samples)
+Swell_with_Harmonics.csv,Swell_with_Harmonics.csv,csv,1817852,1.73 MB,Per-class waveform matrix (signals x samples)
+Swell_with_Oscillatory_Transient.csv,Swell_with_Oscillatory_Transient.csv,csv,1818603,1.73 MB,Per-class waveform matrix (signals x samples)
+Transient.csv,Transient.csv,csv,1846158,1.76 MB,Per-class waveform matrix (signals x samples)
+5Kfs_1Cycle_50f_1000Sam_1A.mat,5Kfs_1Cycle_50f_1000Sam_1A.mat,mat,11362502,10.84 MB,Consolidated tensor for all classes
+seed_pqd_eda.py,seed_pqd_eda.py,py,35082,34.26 KB,Unknown
+Details.txt,Details.txt,txt,891,891.00 B,Dataset metadata/description

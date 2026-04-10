@@ -1,0 +1,5 @@
+Plotted to '/home/abhishek/DACS/schematic/schematic.pdf'.
+
+Plotted to '/home/abhishek/DACS/schematic/schematic.ps'.
+Info: Done.
+Info: Done.

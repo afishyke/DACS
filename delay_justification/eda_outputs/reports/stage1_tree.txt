@@ -1,0 +1,25 @@
+XPQRS/
+├── eda_outputs
+│   ├── plots
+│   ├── reports
+│   └── tables
+├── 5Kfs_1Cycle_50f_1000Sam_1A.mat
+├── Details.txt
+├── Flicker.csv
+├── Flicker_with_Sag.csv
+├── Flicker_with_Swell.csv
+├── Harmonics.csv
+├── Harmonics_with_Sag.csv
+├── Harmonics_with_Swell.csv
+├── Interruption.csv
+├── Notch.csv
+├── Oscillatory_Transient.csv
+├── Pure_Sinusoidal.csv
+├── Sag.csv
+├── Sag_with_Harmonics.csv
+├── Sag_with_Oscillatory_Transient.csv
+├── seed_pqd_eda.py
+├── Swell.csv
+├── Swell_with_Harmonics.csv
+├── Swell_with_Oscillatory_Transient.csv
+└── Transient.csv
