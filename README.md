@@ -1,97 +1,128 @@
-# DACS: Dynamic AC Switching
+# DACS: Digital Automatic Changeover Switch
 
-## 1. Introduction
-DACS is an electronic system designed to monitor the stability of the AC power grid and automatically manage power distribution to loads. It detects grid failures based on voltage and frequency deviations, switches to a battery backup for essential loads, and sheds non-essential loads to conserve power.
+DACS is a discrete-logic power changeover controller that monitors grid health and switches loads between mains and inverter/battery supply. It is designed to avoid relay chatter by requiring sustained bad/good conditions before switching.
 
-The system incorporates delays and counters to prevent rapid switching (chattering) during brief grid fluctuations. It is built entirely using discrete analog and digital components—comparators, timers, logic gates, and counters—without the use of microcontrollers.
+The full finite state machine (FSM), Boolean equations, and timing behavior are documented in `FSM/README.md`.
 
-**Applications:**
-* Uninterruptible Power Supplies (UPS)
-* Off-grid power management
-* Critical load protection (medical equipment, essential lighting)
+## What this project is
 
----
+- A hardware-first automatic changeover system (no microcontroller in the switching core).
+- A three-block architecture: sensing and conditioning, FSM decision logic, and relay output stage.
+- A validated FSM implementation in both Logisim and Verilog.
+- A delay-justification analysis pipeline for power-quality disturbance datasets.
 
-## 2. Project Structure
-The repository contains the following primary directories:
+## Visual overview
 
-* **/SCHEMATIC/**: Contains the KiCad hardware design files, including schematics (`.kicad_sch`), PCB layouts (`.kicad_pcb`), and generated PDF exports.
-* **/Simulation/logisim/**: Contains the `FSM_Grid_Stabilityiteration_FINAL.XML` file for simulating the logic in Logisim.
+### 1) Full hardware architecture (KiCad)
 
----
+![DACS full schematic](hardware/kicad/schematic.png)
 
-## 3. System Overview
-The project is divided into three main blocks:
+### 2) GRID_OK comparator generation (LTspice)
 
-1.  **Block 1 - Inputs:** Handles power conversion, grid monitoring (voltage/frequency), and battery status checking.
-2.  **Block 2 - Logic:** Processes input signals using timers, inverters, AND gates, and counters to implement the Finite State Machine (FSM).
-3.  **Block 3 - Outputs:** Drives relays to connect or disconnect power sources to the loads.
+![GRID_OK comparator simulation](grid_ok_generation/diagram.png)
 
-### Key Signals
-*   **GRID_OK:** High when grid voltage and frequency are within acceptable limits.
-*   **BATT_GOOD:** High when battery voltage is sufficient.
-*   **FSM_CLK:** ~4.8Hz clock for timing operations.
+### 3) Power-quality context plot
 
----
+![Problem statement plot](problem_statement/vx9a7r_q13n5m2k.png)
 
-## 4. Block Explanations
+### 4) Disturbance class signal examples (delay analysis)
 
-### 4.1 Block 1 - Inputs
-*   **Rectifier and Power Supply:** Converts 12V AC to DC via bridge rectifier and LM7805 regulator for a stable +5V logic supply.
-*   **Window Comparator (Voltage Check):** Uses dual LM393 comparators to verify if the scaled `GRID_SENSE` signal is between ~2.78V (lower) and ~4.08V (upper).
-*   **Frequency Window:** Monitors for a 50Hz target. It converts AC to a square wave and uses monostable-like circuits to ensure pulses fall within a valid time window (typically 45Hz–55Hz).
-*   **Battery Monitor:** Compares battery voltage against a reference. If above ~10V, `BATT_GOOD` is asserted.
+![Representative signals by class](delay_justification/eda_outputs/plots/representative_signals_per_class.png)
 
-### 4.2 Block 2 - Logic
-This block implements the decision-making logic and timing delays:
-*   **Clock Generator:** LM555 in astable mode (Ra=1kΩ, Rb=150kΩ, C=1μF) producing ~4.8Hz.
-*   **Counters (74HC163N):**
-    *   **COUNTER_.05:** Provides a ~0.63s delay (3 clock cycles) for failure confirmation/debounce.
-    *   **COUNTER_.50:** Provides a ~1.05s delay (5 clock cycles) for grid stabilization confirmation.
-*   **Gate Logic:** 74HC08 (AND) and 74HC04 (NOT) gates are used to define the FSM states and latching behavior.
+## Repository map
 
-### 4.3 Block 3 - Outputs
-*   **Relay Drivers:** 2N2219 NPN transistors drive SPST-NO relays.
-*   **Relay Logic:**
-    *   **GRID Relay:** Connects loads to the mains when grid is healthy and stable.
-    *   **ESSENTIAL Relay:** Remains active during battery mode.
-    *   **NON-ESSENTIAL Relay:** Sheds load during grid failure to preserve battery.
+- `hardware/kicad/`: complete KiCad design (`.kicad_sch`, `.kicad_pcb`, exports).
+- `grid_ok_generation/`: LTspice comparator model and generated diagram for `GRID_OK` logic.
+- `simulations/logisim/`: Logisim-evolution FSM implementation.
+- `simulations/verilog/`: synthesizable FSM RTL (`FSM_Grid_Stability_v2.v`).
+- `simulations/ltspice/`: LTspice analog simulation files.
+- `FSM/`: equation-level FSM documentation.
+- `problem_statement/`: source image/script + data citation used in early framing.
+- `delay_justification/`: EDA script outputs, plots, and reports for timing-delay defensibility.
 
----
+## How DACS works (end-to-end)
 
-## 5. FSM Definition (Core Logic)
+1. **Input conditioning (Block 1):** rectifies and scales AC sense, checks voltage window and frequency window, and verifies battery level.
+2. **Grid health flag generation:** combines voltage + frequency validity into a digital `GRID_OK` signal.
+3. **FSM logic (Block 2):** samples `GRID_OK` on `FSM_CLK`, uses state memory + counters to enforce delay windows.
+4. **Output drive (Block 3):** relay drivers route power source and shed non-essential load during backup operation.
 
-The system uses a 2-bit Finite State Machine:
+## Core timing and threshold numbers
 
-| State | S1 | S0 | Meaning |
-| :--- | :--- | :--- | :--- |
-| **ST00** | 0 | 0 | **Grid Mode:** Normal operation. |
-| **ST01** | 0 | 1 | **Debounce:** Grid failed, waiting to confirm. |
-| **ST10** | 1 | 0 | **Battery Mode:** Essential loads only. |
-| **ST11** | 1 | 1 | **Stabilization:** Grid returned, waiting to confirm stability. |
+- FSM clock is approximately 5 Hz (report uses 5 Hz for verification, i.e. 200 ms/cycle).
+- Fault confirmation window: 3 cycles (`~600 ms` at 5 Hz).
+- Recovery confirmation window: 5 cycles (`~1.0 s` at 5 Hz).
+- Voltage monitor window used in the design documentation is approximately:
+  - upper threshold: `~4.08 V`
+  - lower threshold: `~2.78 V`
 
-### Transitions
-1.  **ST00 → ST01:** Triggered by `GRID_OK` falling low (grid failure detected).
-2.  **ST01 → ST10:** Triggered after 0.63s if `GRID_OK` remains low (persistent failure).
-3.  **ST10 → ST11:** Triggered by `GRID_OK` returning high (grid recovery).
-4.  **ST11 → ST00:** Triggered after 1.05s if `GRID_OK` remains high (grid stable).
+Clock equation used in design notes:
 
----
-
-## 6. Key Equations and Calculations
-
-### 555 Timer Frequency (FSM_CLK)
 $$
-f = \frac{1.44}{(R_a + 2R_b)\,C} \approx 4.8\ \mathrm{Hz}
-$$
-$$
-T = \frac{1}{f} \approx 0.21\ \mathrm{s}
+f = \frac{1.44}{(R_a + 2R_b)C}
 $$
 
-### Delays
-*   **Debounce (3 cycles):** $3 \times 0.21\,\mathrm{s} \approx 0.63\,\mathrm{s}$
-*   **Stabilization (5 cycles):** $5 \times 0.21\,\mathrm{s} \approx 1.05\,\mathrm{s}$
+With `R_a = 1k\Omega`, `R_b = 150k\Omega`, `C = 1\mu F`:
 
-### Voltage Thresholds (Scaled)
-*   **Upper Threshold:** $\approx 4.08\,\mathrm{V}$ (Typical for ~240V mains equivalent)
-*   **Lower Threshold:** $\approx 2.78\,\mathrm{V}$ (Typical for ~180V mains equivalent)
+$$
+f \approx 4.8\,\text{Hz}, \quad T = \frac{1}{f} \approx 0.21\,\text{s}
+$$
+
+## FSM states (high level)
+
+| State | Bits | Meaning |
+| --- | --- | --- |
+| ST00 | `00` | Grid mode (normal operation) |
+| ST01 | `01` | Grid fault detected, waiting for confirmation |
+| ST10 | `10` | Backup mode (grid confirmed bad) |
+| ST11 | `11` | Grid returned, waiting for stability confirmation |
+
+Transition intent:
+
+- `ST00 -> ST01`: grid falls.
+- `ST01 -> ST10`: fault persists until fault timer expires.
+- `ST10 -> ST11`: grid returns.
+- `ST11 -> ST00`: grid remains healthy until stability timer done.
+- Fast rollback paths protect against short disturbances (`ST01 -> ST00`, `ST11 -> ST10`).
+
+For the complete Boolean equations (`GRID_FALL`, `TIMER_05`, `STABILITY_DONE`, `D0`, `D1`, all term-level equations), see `FSM/README.md`.
+
+## Verification artifacts
+
+From the FSM verification campaign artifacts in this repository:
+
+- 2779 automated checks reported, 0 mismatches.
+- State occupancy observed:
+  - ST00: 169 cycles (42.5%)
+  - ST01: 96 cycles (24.1%)
+  - ST10: 79 cycles (19.9%)
+  - ST11: 54 cycles (13.6%)
+
+Detailed state equations and transition logic are documented in `FSM/README.md`.
+
+## Delay-justification EDA (dataset side)
+
+The `delay_justification/` folder contains a full analysis pipeline for disturbance classes (17 classes, one-cycle signals at 5 kHz sampling). It supports the claim that non-zero observation windows are required before robust disturbance discrimination.
+
+Useful plots include:
+
+- `delay_justification/eda_outputs/plots/representative_signals_per_class.png`
+- `delay_justification/eda_outputs/plots/overlay_transient_related_classes.png`
+- `delay_justification/eda_outputs/plots/scatter_transient_vs_sagswell_derivative_vs_spectralspread.png`
+
+## Main source files
+
+- Verilog FSM: `simulations/verilog/FSM_Grid_Stability_v2.v`
+- Logisim FSM: `simulations/logisim/FSM_Grid_Stabilityiteration_FINAL112233.XML (1).circ`
+- Comparator LTspice: `grid_ok_generation/comparator_grid_ok.asc`
+- Hardware schematic source: `hardware/kicad/schematic.kicad_sch`
+
+## References and citations
+
+- FSM implementation references: `simulations/verilog/FSM_Grid_Stability_v2.v`, `simulations/logisim/FSM_Grid_Stabilityiteration_FINAL112233.XML (1).circ`
+- Smart-meter citation used in problem framing: `problem_statement/citations.txt`
+- Comparator SPICE model source note: `grid_ok_generation/resources.txt`
+
+## License
+
+MIT. See `LICENSE`.
